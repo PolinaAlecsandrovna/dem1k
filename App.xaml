@@ -1,0 +1,8 @@
+﻿<Application x:Class="dem1k.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:dem1k"
+             StartupUri="LoginWindow.xaml">
+    <Application.Resources>
+    </Application.Resources>
+</Application>

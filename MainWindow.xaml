@@ -1,0 +1,118 @@
+﻿<Window x:Class="dem1k.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:dem1k"
+        mc:Ignorable="d"
+        Title="Список товаров - СтройМатериалы" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="White"
+        FontFamily="Calibri">
+    <Window.Resources>
+        <DataTemplate x:Key="ProductTemplate">
+            <Border BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" 
+                    Background="{Binding RowBackgroundColor}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0" Source="{Binding ImagePath, FallbackValue='/Resources/picture.png'}" 
+                           Height="100" Width="100" Stretch="Uniform" VerticalAlignment="Top"/>
+
+                    <StackPanel Grid.Column="1" Margin="15,0,15,0">
+                        <TextBlock FontSize="16" FontWeight="Bold">
+                            <Run Text="{Binding CategoryName}"/> | <Run Text="{Binding Name}"/>
+                        </TextBlock>
+
+                        <TextBlock Text="{Binding Description, StringFormat='Описание: {0}'}" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding ManufacturerName, StringFormat='Производитель: {0}'}"/>
+                        <TextBlock Text="{Binding SupplierName, StringFormat='Поставщик: {0}'}"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock x:Name="OldPrice" Text="{Binding Price, StringFormat='{}{0:C2}'}" 
+                                       Foreground="Red" Margin="0,0,10,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextDecorations" Value="None"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasDiscount}" Value="True">
+                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="{Binding FinalPrice, StringFormat='{}{0:C2}'}" 
+                                       FontWeight="Bold" Foreground="Black">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasDiscount}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding UnitName, StringFormat='Ед. измерения: {0}'}"/>
+                        <TextBlock Text="{Binding StockQuantity, StringFormat='Количество на складе: {0}'}"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" BorderBrush="Black" BorderThickness="1" CornerRadius="5" 
+                            VerticalAlignment="Center" Height="60" Width="100"
+                            Visibility="{Binding IsDiscountVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Скидка" HorizontalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding DiscountPercent, StringFormat='{}{0}%'}" 
+                                       HorizontalAlignment="Center" FontSize="18" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="#DAA520" Height="60">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Grid.Column="0" Source="/Resources/logo.png" Height="40" Margin="10,0,0,0"/>
+
+            <TextBlock Grid.Column="1" Text="Список товаров" VerticalAlignment="Center" 
+                       HorizontalAlignment="Center" FontSize="24" Foreground="White" FontWeight="Bold"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,10,0">
+                <TextBlock x:Name="lblUserInfo" VerticalAlignment="Center" FontSize="16" 
+                           Foreground="White" Margin="0,0,15,0"/>
+                <Button Content="Выход" Padding="10,5" Background="#B8860B" Foreground="White" 
+                        Click="BtnLogout_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="icProducts" ItemTemplate="{StaticResource ProductTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>
