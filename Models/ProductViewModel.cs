@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace dem1k.Models
 {
@@ -38,5 +39,16 @@ namespace dem1k.Models
         public bool HasDiscount => DiscountPercent > 0;
 
         public bool IsDiscountVisible => DiscountPercent > 0;
+
+        public string FullImagePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ImagePath) || !File.Exists(ImagePath))
+                    return "/Resources/picture.png"; 
+                return ImagePath;
+            }
+        }
     }
+
 }

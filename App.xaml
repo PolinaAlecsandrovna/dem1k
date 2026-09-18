@@ -4,5 +4,6 @@
              xmlns:local="clr-namespace:dem1k"
              StartupUri="LoginWindow.xaml">
     <Application.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Application.Resources>
 </Application>

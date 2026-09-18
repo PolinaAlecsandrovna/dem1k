@@ -1,0 +1,44 @@
+﻿<Window x:Class="dem1k.OrderEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:dem1k"
+        mc:Ignorable="d"
+        Title="Редактирование заказа" Height="450" Width="400"
+        WindowStartupLocation="CenterScreen" Background="White" FontFamily="Calibri">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Артикул:" Grid.Row="0" Margin="0,5"/>
+        <TextBox x:Name="txtArticle" Grid.Row="1" Height="25" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Статус заказа:" Grid.Row="2" Margin="0,5"/>
+        <ComboBox x:Name="cmbStatus" Grid.Row="3" Height="25" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Адрес пункта выдачи:" Grid.Row="4" Margin="0,5"/>
+        <TextBox x:Name="txtAddress" Grid.Row="5" Height="25" Margin="0,0,0,10" IsReadOnly="True" Text="Адрес по умолчанию (ID 1)"/>
+
+        <TextBlock Text="Дата заказа:" Grid.Row="6" Margin="0,5"/>
+        <DatePicker x:Name="dpOrderDate" Grid.Row="7" Height="25" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Дата выдачи:" Grid.Row="8" Margin="0,5"/>
+        <DatePicker x:Name="dpDeliveryDate" Grid.Row="9" Height="25" Margin="0,0,0,10"/>
+
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,95,0,-75">
+            <Button Content="Сохранить" Width="100" Height="30" Margin="10" Background="#B8860B" Foreground="White" Click="BtnSave_Click"/>
+            <Button x:Name="btnDelete" Content="Удалить" Width="100" Height="30" Margin="10" Background="Red" Foreground="White" Click="BtnDelete_Click" Visibility="Collapsed"/>
+            <Button Content="Отмена" Width="100" Height="30" Margin="10" Click="BtnCancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

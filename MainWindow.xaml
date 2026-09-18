@@ -20,7 +20,7 @@
                         <ColumnDefinition Width="120"/>
                     </Grid.ColumnDefinitions>
 
-                    <Image Grid.Column="0" Source="{Binding ImagePath, FallbackValue='/Resources/picture.png'}" 
+                    <Image Grid.Column="0" Source="{Binding FullImagePath}" 
                            Height="100" Width="100" Stretch="Uniform" VerticalAlignment="Top"/>
 
                     <StackPanel Grid.Column="1" Margin="15,0,15,0">
@@ -82,6 +82,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -105,7 +106,30 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="FilterPanel" Grid.Row="1" Orientation="Horizontal" Margin="10" Visibility="Collapsed">
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox x:Name="txtSearch" Width="200" Height="25" TextChanged="TxtSearch_TextChanged"/>
+
+            <TextBlock Text="Производитель:" VerticalAlignment="Center" Margin="20,0,5,0"/>
+            <ComboBox x:Name="cmbManufacturer" Width="150" Height="25" SelectionChanged="CmbManufacturer_SelectionChanged"/>
+
+            <TextBlock Text="Сортировка:" VerticalAlignment="Center" Margin="20,0,5,0"/>
+            <ComboBox x:Name="cmbSort" Width="150" Height="25" SelectionChanged="CmbSort_SelectionChanged">
+                <ComboBoxItem Content="Без сортировки"/>
+                <ComboBoxItem Content="Цена (по возрастанию)"/>
+                <ComboBoxItem Content="Цена (по убыванию)"/>
+                <ComboBoxItem Content="Кол-во (по возрастанию)"/>
+                <ComboBoxItem Content="Кол-во (по убыванию)"/>
+            </ComboBox>
+
+            <Button x:Name="btnOrders" Content="Заказы" Margin="20,0,0,0" Padding="10,5" 
+                    Background="#B8860B" Foreground="White" Click="BtnOrders_Click" Visibility="Collapsed"/>
+
+            <Button x:Name="btnAddProduct" Content="Добавить товар" Margin="20,0,0,0" Padding="10,5" 
+                    Background="#B8860B" Foreground="White" Click="BtnAddProduct_Click" Visibility="Collapsed"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ItemsControl x:Name="icProducts" ItemTemplate="{StaticResource ProductTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

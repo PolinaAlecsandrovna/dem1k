@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Npgsql;
 using System.Threading.Tasks;
 
 namespace dem1k
@@ -92,6 +93,171 @@ namespace dem1k
                 }
             }
             return false;
+        }
+        public static void AddProduct(ProductViewModel product)
+        {
+            string sql = @"
+        INSERT INTO products (name, description, category_id, manufacturer_id, supplier_id, unit_id, price, stock_quantity, discount_percent, image_path, article)
+        VALUES (@name, @desc, 1, 1, 1, 1, @price, @qty, @discount, @img, @article)";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("name", product.Name);
+                    cmd.Parameters.AddWithValue("desc", (object)product.Description ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("price", product.Price);
+                    cmd.Parameters.AddWithValue("qty", product.StockQuantity);
+                    cmd.Parameters.AddWithValue("discount", product.DiscountPercent);
+                    cmd.Parameters.AddWithValue("img", (object)product.ImagePath ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("article", "ART-" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper());
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateProduct(ProductViewModel product)
+        {
+            string sql = @"
+        UPDATE products 
+        SET name = @name, 
+            description = @desc, 
+            price = @price, 
+            stock_quantity = @qty, 
+            discount_percent = @discount, 
+            image_path = @img
+        WHERE id = @id";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("id", product.Id);
+                    cmd.Parameters.AddWithValue("name", product.Name);
+                    cmd.Parameters.AddWithValue("desc", (object)product.Description ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("price", product.Price);
+                    cmd.Parameters.AddWithValue("qty", product.StockQuantity);
+                    cmd.Parameters.AddWithValue("discount", product.DiscountPercent);
+                    cmd.Parameters.AddWithValue("img", (object)product.ImagePath ?? DBNull.Value);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static List<OrderViewModel> GetOrders()
+        {
+            List<OrderViewModel> list = new List<OrderViewModel>();
+            string sql = @"
+        SELECT o.id, o.article, os.name as status, 
+               COALESCE(c.name || ', ул. ' || s.name || ', д. ' || pa.house, 'Не указан') as address,
+               o.order_date, o.delivery_date
+        FROM orders o
+        LEFT JOIN order_statuses os ON o.status_id = os.id
+        LEFT JOIN pickup_address pa ON o.pickup_address_id = pa.id
+        LEFT JOIN cities c ON pa.id_cities = c.id
+        LEFT JOIN streets s ON pa.id_streets = s.id
+        ORDER BY o.order_date DESC";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new OrderViewModel
+                        {
+                            Id = reader.GetInt32(0),
+                            Article = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                            StatusName = reader.IsDBNull(2) ? "Не указан" : reader.GetString(2),
+                            PickupAddress = reader.IsDBNull(3) ? "Не указан" : reader.GetString(3),
+                            OrderDate = reader.GetDateTime(4),
+                            DeliveryDate = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5)
+                        });
+                    }
+                }
+            }
+            return list;
+        }
+
+        public static List<string> GetOrderStatuses()
+        {
+            List<string> list = new List<string>();
+            string sql = "SELECT name FROM order_statuses ORDER BY id";
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read()) list.Add(reader.GetString(0));
+                }
+            }
+            return list;
+        }
+
+        public static void AddOrder(string article, string statusName, string address, DateTime orderDate, DateTime? deliveryDate)
+        {
+            string sql = @"
+        INSERT INTO orders (article, status_id, pickup_address_id, user_id, order_date, delivery_date)
+        VALUES (@art, (SELECT id FROM order_statuses WHERE name = @status LIMIT 1), 1, 1, @odate, @ddate)";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("art", article);
+                    cmd.Parameters.AddWithValue("status", statusName);
+                    cmd.Parameters.AddWithValue("odate", orderDate);
+                    cmd.Parameters.AddWithValue("ddate", (object)deliveryDate ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateOrder(int id, string article, string statusName, DateTime orderDate, DateTime? deliveryDate)
+        {
+            string sql = @"
+        UPDATE orders 
+        SET article = @art, 
+            status_id = (SELECT id FROM order_statuses WHERE name = @status LIMIT 1), 
+            order_date = @odate, 
+            delivery_date = @ddate
+        WHERE id = @id";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("id", id);
+                    cmd.Parameters.AddWithValue("art", article);
+                    cmd.Parameters.AddWithValue("status", statusName);
+                    cmd.Parameters.AddWithValue("odate", orderDate);
+                    cmd.Parameters.AddWithValue("ddate", (object)deliveryDate ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void DeleteOrder(int id)
+        {
+            string sql = "DELETE FROM orders WHERE id = @id";
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
     }
 }
