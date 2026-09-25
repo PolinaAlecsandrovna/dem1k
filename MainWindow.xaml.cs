@@ -58,8 +58,9 @@ namespace dem1k
 
         private void LoadProducts()
         {
-            List<ProductViewModel> products = DbHelper.GetProducts();
-            icProducts.ItemsSource = products;
+            _allProducts = DbHelper.GetProducts();  
+            icProducts.ItemsSource = _allProducts;
+            LoadManufacturers();                     
         }
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
