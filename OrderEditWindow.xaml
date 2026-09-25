@@ -27,7 +27,7 @@
         <ComboBox x:Name="cmbStatus" Grid.Row="3" Height="25" Margin="0,0,0,10"/>
 
         <TextBlock Text="Адрес пункта выдачи:" Grid.Row="4" Margin="0,5"/>
-        <TextBox x:Name="txtAddress" Grid.Row="5" Height="25" Margin="0,0,0,10" IsReadOnly="True" Text="Адрес по умолчанию (ID 1)"/>
+        <ComboBox x:Name="cmbAddress" Grid.Row="5" Height="25" Margin="0,0,0,10" DisplayMemberPath="FullAddress"/>
 
         <TextBlock Text="Дата заказа:" Grid.Row="6" Margin="0,5"/>
         <DatePicker x:Name="dpOrderDate" Grid.Row="7" Height="25" Margin="0,0,0,10"/>

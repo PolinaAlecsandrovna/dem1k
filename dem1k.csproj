@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\OrderViewModel.cs" />
+    <Compile Include="Models\PickupAddressViewModel.cs" />
     <Compile Include="Models\ProductViewModel.cs" />
     <Compile Include="OrderEditWindow.xaml.cs">
       <DependentUpon>OrderEditWindow.xaml</DependentUpon>

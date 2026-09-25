@@ -25,6 +25,7 @@ namespace dem1k
             _order = order;
 
             cmbStatus.ItemsSource = DbHelper.GetOrderStatuses();
+            cmbAddress.ItemsSource = DbHelper.GetPickupAddresses();
 
             if (_order != null)
             {
@@ -39,30 +40,53 @@ namespace dem1k
             else
             {
                 Title = "Добавление заказа";
-                dpOrderDate.SelectedDate = DateTime.Now; 
+                dpOrderDate.SelectedDate = DateTime.Now;
                 cmbStatus.SelectedIndex = 0;
+                if (cmbAddress.Items.Count > 0)
+                    cmbAddress.SelectedIndex = 0;
             }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtArticle.Text) || cmbStatus.SelectedItem == null || dpOrderDate.SelectedDate == null)
+            if (string.IsNullOrWhiteSpace(txtArticle.Text)
+                || cmbStatus.SelectedItem == null
+                || dpOrderDate.SelectedDate == null
+                || cmbAddress.SelectedItem == null)
             {
-                MessageBox.Show("Заполните обязательные поля: Артикул, Статус и Дата заказа!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Заполните обязательные поля: Артикул, Статус, Адрес и Дата заказа!",
+                                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            var selectedAddress = (dem1k.Models.PickupAddressViewModel)cmbAddress.SelectedItem;
+
             try
             {
-                if (_order == null) 
+                if (_order == null)
                 {
-                    DbHelper.AddOrder(txtArticle.Text, cmbStatus.SelectedItem.ToString(), txtAddress.Text, dpOrderDate.SelectedDate.Value, dpDeliveryDate.SelectedDate);
-                    MessageBox.Show("Заказ успешно добавлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DbHelper.AddOrder(
+                        txtArticle.Text,
+                        cmbStatus.SelectedItem.ToString(),
+                        selectedAddress.Id,
+                        dpOrderDate.SelectedDate.Value,
+                        dpDeliveryDate.SelectedDate);
+
+                    MessageBox.Show("Заказ успешно добавлен!", "Успех",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else 
+                else
                 {
-                    DbHelper.UpdateOrder(_order.Id, txtArticle.Text, cmbStatus.SelectedItem.ToString(), dpOrderDate.SelectedDate.Value, dpDeliveryDate.SelectedDate);
-                    MessageBox.Show("Заказ успешно обновлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DbHelper.UpdateOrder(
+                        _order.Id,
+                        txtArticle.Text,
+                        cmbStatus.SelectedItem.ToString(),
+                        selectedAddress.Id,
+                        dpOrderDate.SelectedDate.Value,
+                        dpDeliveryDate.SelectedDate);
+
+                    MessageBox.Show("Заказ успешно обновлен!", "Успех",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 DialogResult = true;
@@ -70,7 +94,8 @@ namespace dem1k
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении:\n{ex.Message}", "Ошибка БД", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при сохранении:\n{ex.Message}",
+                                "Ошибка БД", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -78,20 +103,24 @@ namespace dem1k
         {
             if (_order == null) return;
 
-            var result = MessageBox.Show("Вы уверены, что хотите удалить этот заказ?", "Подтверждение удаления",
+            var result = MessageBox.Show("Вы уверены, что хотите удалить этот заказ?",
+                                         "Подтверждение удаления",
                                          MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
                     DbHelper.DeleteOrder(_order.Id);
-                    MessageBox.Show("Заказ удален!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Заказ удален!", "Успех",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
                     DialogResult = true;
                     Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при удалении:\n{ex.Message}", "Ошибка БД", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Ошибка при удалении:\n{ex.Message}",
+                                    "Ошибка БД", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

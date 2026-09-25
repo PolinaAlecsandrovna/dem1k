@@ -201,11 +201,17 @@ namespace dem1k
             return list;
         }
 
-        public static void AddOrder(string article, string statusName, string address, DateTime orderDate, DateTime? deliveryDate)
+        public static void AddOrder(string article, string statusName, long addressId,
+                            DateTime orderDate, DateTime? deliveryDate)
         {
             string sql = @"
         INSERT INTO orders (article, status_id, pickup_address_id, user_id, order_date, delivery_date)
-        VALUES (@art, (SELECT id FROM order_statuses WHERE name = @status LIMIT 1), 1, 1, @odate, @ddate)";
+        VALUES (@art,
+                (SELECT id FROM order_statuses WHERE name = @status LIMIT 1),
+                @addr,
+                1,
+                @odate,
+                @ddate)";
 
             using (var conn = GetConnection())
             {
@@ -214,6 +220,7 @@ namespace dem1k
                 {
                     cmd.Parameters.AddWithValue("art", article);
                     cmd.Parameters.AddWithValue("status", statusName);
+                    cmd.Parameters.AddWithValue("addr", addressId);
                     cmd.Parameters.AddWithValue("odate", orderDate);
                     cmd.Parameters.AddWithValue("ddate", (object)deliveryDate ?? DBNull.Value);
                     cmd.ExecuteNonQuery();
@@ -221,13 +228,15 @@ namespace dem1k
             }
         }
 
-        public static void UpdateOrder(int id, string article, string statusName, DateTime orderDate, DateTime? deliveryDate)
+        public static void UpdateOrder(int id, string article, string statusName, long addressId,
+                                       DateTime orderDate, DateTime? deliveryDate)
         {
             string sql = @"
-        UPDATE orders 
-        SET article = @art, 
-            status_id = (SELECT id FROM order_statuses WHERE name = @status LIMIT 1), 
-            order_date = @odate, 
+        UPDATE orders
+        SET article = @art,
+            status_id = (SELECT id FROM order_statuses WHERE name = @status LIMIT 1),
+            pickup_address_id = @addr,
+            order_date = @odate,
             delivery_date = @ddate
         WHERE id = @id";
 
@@ -239,6 +248,7 @@ namespace dem1k
                     cmd.Parameters.AddWithValue("id", id);
                     cmd.Parameters.AddWithValue("art", article);
                     cmd.Parameters.AddWithValue("status", statusName);
+                    cmd.Parameters.AddWithValue("addr", addressId);
                     cmd.Parameters.AddWithValue("odate", orderDate);
                     cmd.Parameters.AddWithValue("ddate", (object)deliveryDate ?? DBNull.Value);
                     cmd.ExecuteNonQuery();
@@ -258,6 +268,36 @@ namespace dem1k
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+        public static List<PickupAddressViewModel> GetPickupAddresses()
+        {
+            List<PickupAddressViewModel> list = new List<PickupAddressViewModel>();
+            string sql = @"
+        SELECT pa.id, 
+               COALESCE(c.name || ', ул. ' || s.name || ', д. ' || pa.house, 
+                        'Адрес #' || pa.id) AS full_address
+        FROM pickup_address pa
+        LEFT JOIN cities c ON pa.id_cities = c.id
+        LEFT JOIN streets s ON pa.id_streets = s.id
+        ORDER BY pa.id";
+
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new PickupAddressViewModel
+                        {
+                            Id = reader.GetInt64(0),
+                            FullAddress = reader.IsDBNull(1) ? "Не указан" : reader.GetString(1)
+                        });
+                    }
+                }
+            }
+            return list;
         }
     }
 }
